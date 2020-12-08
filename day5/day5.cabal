@@ -1,0 +1,10 @@
+name: day5
+version: 1.0.0
+license: BSD3
+cabal-version: >= 1.18
+build-type: Simple
+
+executable day5
+    build-depends: base, parsec, containers
+    main-is: Main.hs
+    default-language: Haskell2010
