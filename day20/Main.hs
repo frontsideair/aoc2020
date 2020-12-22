@@ -62,8 +62,7 @@ checkSeaMonsters matrix =
 parser :: Parser Input
 parser = flip sepBy endOfLine $ do
   tid <- TileId <$> (string "Tile " *> decimal <* char ':' <* endOfLine)
-  t <- tile
-  return (Tile tid t)
+  Tile tid <$> tile
   where
     cell =
       (char '.' $> MyBool False)
@@ -94,29 +93,33 @@ flipEdge = Edge . V.reverse . unEdge
 tileEdges :: Tile -> [(Edge, Direction)]
 tileEdges t = [(leftEdge t, DLeft), (rightEdge t, DRight), (topEdge t, DTop), (bottomEdge t, DBottom)]
 
--- run1 :: Input -> _
--- run1 input =
---   let (edges :: Map Edge [TileId]) =
---         input
---           & map (\t -> Map.fromList $ map (,[tileId t]) (tileEdges t))
---           & foldl' (Map.unionWith (++)) Map.empty
---    in edges
---         & Map.elems
---         & mapMaybe
---           ( \case
---               [t1, t2] -> Just (t1, t2)
---               [_] -> Nothing
---               _ -> error "foo"
---           )
---         & ordNub
---         & concatMap (\(i, j) -> [i, j])
---         & sort
---         & group
---         & map (\xs@(x : _) -> (x, length xs))
---         & filter ((== 2) . snd)
---         & map fst
---         & map unTileId
---         & product
+allTileEdges t = xs ++ (flipEdge <$> xs)
+  where
+    xs = fst <$> tileEdges t
+
+run1 :: Input -> _
+run1 input =
+  let edges =
+        input
+          & map (\t -> Map.fromList $ map (,[tileId t]) (allTileEdges t))
+          & foldl' (Map.unionWith (++)) Map.empty
+   in edges
+        & Map.elems
+        & mapMaybe
+          ( \case
+              [t1, t2] -> Just (t1, t2)
+              [_] -> Nothing
+              _ -> error "foo"
+          )
+        & ordNub
+        & concatMap (\(i, j) -> [i, j])
+        & sort
+        & group
+        & map (\xs@(x : _) -> (x, length xs))
+        & filter ((== 2) . snd)
+        & map fst
+        & map unTileId
+        & product
 
 run2 :: Input -> _
 run2 input =
@@ -178,6 +181,5 @@ main = do
       Left err -> do
         hPutStrLn stderr $ "parse failed: " <> show err
         exitFailure
-  print "running"
-  -- print $ run1 parsed
+  print $ run1 parsed
   print $ run2 parsed
