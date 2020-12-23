@@ -123,18 +123,14 @@ run1 input =
 
 run2 :: Input -> _
 run2 input =
-  let initTile : unknownTiles = input
+  let initTile = Unsafe.head input
       initPos = (0, 0)
       (edges :: Map (Edge, Direction) [Tile]) =
         input
           & concatMap rotations
           & map (\t -> Map.fromList $ map (,[t]) (tileEdges t))
           & foldl' (Map.unionWith (++)) Map.empty
-      tiles =
-        input
-          & map tileId
-          & Set.fromList
-      solution = solve edges [(initPos, initTile)] Map.empty tiles
+      solution = solve edges [(initPos, initTile)] Map.empty
       matrixSize = floor $ sqrt $ fromIntegral $ Map.size solution
       assembled = assemble matrixSize solution
       numMonsters = maximum $ checkSeaMonsters <$> rotationsM assembled
@@ -142,15 +138,9 @@ run2 input =
       mapTiles = length $ filter (== MyBool True) $ Matrix.toList assembled
    in mapTiles - (numMonsters * monsterTiles)
 
-solve _ [] placed _ = placed
-solve edges (((y, x), tile) : queue) placed unplaced
-  | Set.null unplaced = placed
-  | otherwise =
-    solve
-      edges
-      (queue ++ neighbors)
-      (Map.insert (y, x) tile placed)
-      (Set.delete (tileId tile) unplaced)
+solve _ [] placed = placed
+solve edges (((y, x), tile) : queue) placed =
+  solve edges (queue ++ neighbors) (Map.insert (y, x) tile placed)
   where
     neighbors =
       mapMaybe
@@ -162,7 +152,7 @@ solve edges (((y, x), tile) : queue) placed unplaced
         ]
     lookup (coord, edge) = do
       candidate <- find (\t -> tileId t /= tileId tile) $ edges Map.! edge
-      if Set.member (tileId tile) unplaced then Just (coord, candidate) else Nothing
+      if Map.notMember (y, x) placed then Just (coord, candidate) else Nothing
 
 dropEdges matrix = Matrix.submatrix 2 (Matrix.nrows matrix - 1) 2 (Matrix.ncols matrix - 1) matrix
 
