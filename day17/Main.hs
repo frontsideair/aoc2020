@@ -5,14 +5,11 @@ import Control.Comonad
 import Control.Comonad.Representable.Store (Store (..), StoreT (..), experiment, runStore, store)
 import Data.Bool (bool)
 import Data.Distributive (Distributive (..))
-import Data.Either
-import Data.Functor
 import Data.Functor.Compose (Compose (..))
 import Data.Functor.Identity (Identity (..))
 import Data.Functor.Rep (Representable (..), distributeRep)
 import Data.List (find, foldl', length)
 import qualified Data.Map.Strict as M
-import Data.Maybe
 import qualified Data.Total.Map as T
 import Text.Parsec hiding (Empty, count)
 import Text.Parsec.String
@@ -20,8 +17,6 @@ import Text.Parsec.String
 size = 12
 
 dbSize = size * 2 + 1
-
-type TotalMap a b = T.TotalMap b a
 
 type Grid a = Store (T.TotalMap Coord) a
 

@@ -1,3 +1,5 @@
+module Main (main) where
+
 year = 2020
 
 main :: IO ()
