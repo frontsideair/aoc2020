@@ -1,10 +1,10 @@
-{ mkDerivation, base, stdenv }:
+{ mkDerivation, attoparsec, base, containers, stdenv, text }:
 mkDerivation {
   pname = "day19";
   version = "1.0.0";
   src = ./.;
   isLibrary = false;
   isExecutable = true;
-  executableHaskellDepends = [ base ];
+  executableHaskellDepends = [ attoparsec base containers text ];
   license = stdenv.lib.licenses.bsd3;
 }
